@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Curie&rsquo;s Temperature — Upside Down Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B2541; --navy2:#26325A; --grid:#33416B; --cream:#F4EFE6; --card:#FFFFFF;
+    --gold:#E2AC48; --ochre:#8A5A12; --teal:#2E7D74; --tealB:#45B3A5; --orange:#D9773A;
+    --ink:#1B2541; --line:#E6DDCB;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{overflow:hidden}
+  body{background:var(--cream);color:var(--ink);font-family:'Nunito',system-ui,sans-serif;font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased}
+  .wrap{width:1000px;transform-origin:top left;background:var(--cream)}
+  header{background:var(--navy);padding:14px 24px 12px;color:#fff}
+  h1{font-size:1.6rem;font-weight:800;margin:0;letter-spacing:.01em}
+  .bar{width:150px;height:4px;background:var(--gold);border-radius:2px;margin:6px 0 6px}
+  .sub{font-size:.92rem;font-weight:700;color:#F4EFE6}
+  main{padding:12px 20px 8px}
+  .stage{display:grid;gap:12px;align-items:start}
+  .card{background:var(--card);border-radius:12px;padding:10px 14px 12px;box-shadow:0 1px 3px rgba(27,37,65,.12)}
+  .card h2{display:flex;align-items:center;gap:9px;font-size:.84rem;font-weight:800;letter-spacing:.06em;margin:0 0 8px;color:var(--navy)}
+  .ic{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none}
+  .ic svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .ic.gold{background:var(--gold)} .ic.gold svg{stroke:var(--navy)}
+  .ic.teal{background:var(--teal)} .ic.orange{background:var(--orange)} .ic.navy{background:var(--navy)}
+  canvas{display:block;width:100%;background:var(--navy);border-radius:10px}
+  .hint{font-size:.8rem;font-weight:700;color:var(--ochre);margin-top:6px}
+  .panel{display:flex;flex-direction:column;gap:12px}
+  .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .row .k{font-size:.9rem;font-weight:700;white-space:nowrap}
+  .row .v{font-size:1.1rem;font-weight:800;font-variant-numeric:tabular-nums;text-align:right;color:var(--navy)}
+  .row .v.hot{color:var(--orange)}
+  input[type=range]{width:100%;accent-color:var(--gold)}
+  .ends{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;color:var(--ochre)}
+  .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  button{font-family:inherit;font-size:.9rem;font-weight:800;background:var(--navy);color:#fff;border:2px solid var(--navy);border-radius:8px;padding:7px 10px;cursor:pointer}
+  button:hover{background:var(--navy2)}
+  button.teal{background:var(--teal);border-color:var(--teal)}
+  button.teal:hover{background:#25685F}
+  button.ghost{background:#fff;color:var(--navy)}
+  button.ghost:hover{background:var(--cream)}
+  button.on{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+  button.wide{grid-column:1/-1}
+  button:focus-visible,input:focus-visible,canvas:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+  footer{display:flex;justify-content:space-between;gap:12px;padding:6px 22px 10px;font-size:.8rem;font-weight:700;color:var(--ochre)}
+
+  .stage{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+  canvas{height:auto}
+  .row .v.gone{color:var(--orange)}
+  .btns{grid-template-columns:1fr}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Curie&rsquo;s Temperature</h1>
+    <div class="bar"></div>
+    <div class="sub">Raise the temperature and watch what happens inside the iron.</div>
+  </header>
+  <main>
+  <div class="stage">
+    <div class="card">
+      <h2><span class="ic orange"><svg viewBox="0 0 24 24"><path d="M12 3c2 3 5 5 5 9a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-8z"/></svg></span>IRON MAGNET HOLDING A PAPER CLIP</h2>
+      <canvas id="c" width="1400" height="760" aria-label="A magnet holding a paper clip, with arrows showing the arrangement inside the iron."></canvas>
+      <div class="hint" id="hint">Drag the temperature slider.</div>
+    </div>
+    <div class="panel">
+      <div class="card">
+        <h2><span class="ic gold"><svg viewBox="0 0 24 24"><path d="M14 14.8V4a2 2 0 0 0-4 0v10.8a4 4 0 1 0 4 0z"/></svg></span>READINGS</h2>
+        <div class="row"><span class="k">Temperature</span><span class="v" id="rT">20 &deg;C</span></div>
+        <div class="row"><span class="k">Arrangement inside</span><span class="v" id="rA">aligned</span></div>
+        <div class="row"><span class="k">Magnetism</span><span class="v" id="rM">100%</span></div>
+      </div>
+      <div class="card">
+        <h2><span class="ic teal"><svg viewBox="0 0 24 24"><path d="M4 12h16"/><circle cx="9" cy="12" r="3"/></svg></span><label for="temp">TEMPERATURE</label></h2>
+        <input type="range" id="temp" min="20" max="1000" step="5" value="20">
+        <div class="ends"><span>20 &deg;C</span><span>1,000 &deg;C</span></div>
+        <div class="btns"><button id="bReset" class="ghost">Start over</button></div>
+      </div>
+    </div>
+  </div>
+  </main>
+  <footer><span>Upside Down Learning</span><span>Arrows show the direction of tiny magnetic regions in the iron.</span></footer>
+</div>
+<script>
+(function(){
+  "use strict";
+  var cv=document.getElementById('c'),ctx=cv.getContext('2d');
+  var W=cv.width,H=cv.height;
+  var COL={navy:"#1B2541",grid:"#33416B",cream:"#F4EFE6",gold:"#E2AC48",teal:"#45B3A5",orange:"#D9773A"};
+  var FONT="'Nunito',system-ui,sans-serif";
+  var CURIE=770,T=20,scrambled=false,clipFall=0,seedAngles=[];
+  var COLS=7,ROWS=12;
+  for(var i=0;i<COLS*ROWS;i++)seedAngles.push(Math.random()*Math.PI*2);
+  var MX=W*0.24,MY=H*0.10,MW=W*0.19,MH=H*0.50;
+  function order(){if(scrambled)return 0;if(T<=200)return 1;if(T>=CURIE)return 0;return Math.pow((CURIE-T)/(CURIE-200),0.65);}
+  function heatColor(){ // steel gray warming to glowing orange
+    var f=Math.max(0,Math.min(1,(T-300)/(1000-300)));
+    var r=Math.round(110+f*(232-110)),g=Math.round(122+f*(110-122)),b=Math.round(140+f*(50-140));
+    return 'rgb('+r+','+g+','+b+')';}
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function drawMagnet(){
+    ctx.save();
+    if(T>500){ctx.shadowColor='rgba(217,119,58,'+Math.min(0.8,(T-500)/500)+')';ctx.shadowBlur=40;}
+    ctx.fillStyle=heatColor();rr(MX,MY,MW,MH,14);ctx.fill();ctx.shadowBlur=0;
+    ctx.strokeStyle=COL.cream;ctx.lineWidth=4;ctx.stroke();
+    var o=order(),cw=MW/COLS,ch=MH/ROWS;
+    for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){
+      var idx=r*COLS+c,cx=MX+cw*(c+0.5),cy=MY+ch*(r+0.5),rand=seedAngles[idx];
+      var ang=(1-o)*rand+o*(-Math.PI/2);
+      if(o>0&&o<1)ang=-Math.PI/2+(1-o)*Math.sin(rand*7+T*0.05)*Math.PI;
+      var L=Math.min(cw,ch)*0.36,dx=Math.cos(ang)*L,dy=Math.sin(ang)*L;
+      ctx.strokeStyle=COL.navy;ctx.lineWidth=3.5;
+      ctx.beginPath();ctx.moveTo(cx-dx,cy-dy);ctx.lineTo(cx+dx,cy+dy);ctx.stroke();
+      ctx.beginPath();ctx.arc(cx+dx,cy+dy,4.2,0,Math.PI*2);ctx.fillStyle=COL.navy;ctx.fill();
+    }
+    ctx.restore();
+  }
+  function drawClip(){
+    var ax=MX+MW/2,ay=MY+MH,x=ax+clipFall*W*0.05,y=ay+50+clipFall*(H*0.25);
+    ctx.save();ctx.translate(x,y);ctx.rotate(clipFall*0.9);ctx.scale(1.45,1.45);
+    ctx.strokeStyle=COL.cream;ctx.lineWidth=6;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(-12,-34);ctx.lineTo(-12,26);ctx.arc(0,26,12,Math.PI,0,true);
+    ctx.lineTo(12,-20);ctx.arc(0,-20,12,0,Math.PI,true);ctx.lineTo(-4,18);ctx.stroke();ctx.restore();
+  }
+  function drawBench(){ctx.save();ctx.strokeStyle=COL.grid;ctx.lineWidth=6;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(W*0.06,H*0.94);ctx.lineTo(W*0.60,H*0.94);ctx.stroke();ctx.restore();}
+  function drawScale(){
+    var x=W*0.74,y0=H*0.10,y1=H*0.82;
+    ctx.save();ctx.strokeStyle=COL.grid;ctx.lineWidth=18;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.stroke();
+    ctx.fillStyle=COL.grid;ctx.beginPath();ctx.arc(x,y1+18,26,0,Math.PI*2);ctx.fill();
+    var yT=y1-(T-20)/(1000-20)*(y1-y0);
+    ctx.fillStyle=COL.orange;ctx.beginPath();ctx.arc(x,y1+18,19,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=COL.orange;ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,yT);ctx.stroke();
+    ctx.strokeStyle=COL.gold;ctx.lineWidth=3;ctx.fillStyle=COL.cream;ctx.font='800 26px '+FONT;
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    for(var tv=200;tv<=1000;tv+=200){var yt=y1-(tv-20)/(1000-20)*(y1-y0);
+      ctx.beginPath();ctx.moveTo(x+20,yt);ctx.lineTo(x+40,yt);ctx.stroke();ctx.fillText(tv.toLocaleString()+' °C',x+52,yt);}
+    ctx.restore();
+  }
+  function render(){
+    ctx.clearRect(0,0,W,H);drawBench();drawScale();drawMagnet();drawClip();
+    document.getElementById('rT').textContent=Math.round(T).toLocaleString()+' °C';
+    var o=order(),aEl=document.getElementById('rA'),mEl=document.getElementById('rM');
+    if(o>=0.98){aEl.textContent='aligned';aEl.className='v';}
+    else if(o<=0.02){aEl.textContent='random';aEl.className='v gone';}
+    else{aEl.textContent='breaking up';aEl.className='v';}
+    var pct=Math.round(o*100);mEl.textContent=pct+'%';mEl.className=pct===0?'v gone':'v';
+  }
+  function setTemp(v){T=v;if(T>=CURIE&&!scrambled){scrambled=true;animateFall();}render();}
+  function animateFall(){var t0=performance.now();(function step(now){var p=Math.min(1,(now-t0)/700);clipFall=p*p;render();if(p<1)requestAnimationFrame(step);})(t0);}
+  document.getElementById('temp').addEventListener('input',function(e){setTemp(parseFloat(e.target.value));});
+  document.getElementById('bReset').addEventListener('click',function(){scrambled=false;clipFall=0;T=20;document.getElementById('temp').value=20;
+    for(var i=0;i<seedAngles.length;i++)seedAngles[i]=Math.random()*Math.PI*2;render();});
+  var wrap=document.querySelector('.wrap');
+  function fit(){wrap.style.transform="none";wrap.style.marginLeft="0";var s=Math.min(window.innerWidth/wrap.offsetWidth,window.innerHeight/wrap.offsetHeight);wrap.style.transform="scale("+s+")";wrap.style.marginLeft=Math.max(0,(window.innerWidth-wrap.offsetWidth*s)/2)+"px";}
+  window.addEventListener('resize',fit);
+  (document.fonts?document.fonts.ready:Promise.resolve()).then(function(){render();fit();});
+  render();fit();
+})();
+</script>
+</body>
+</html>
